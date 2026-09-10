@@ -14,7 +14,7 @@ setup: .env
 build:
 	$(COMPOSE) -f docker-compose.yml build app
 
-ci: .env
+ci:
 	$(COMPOSE) -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from app
 
 test: ci

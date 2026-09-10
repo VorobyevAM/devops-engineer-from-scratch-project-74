@@ -3,20 +3,24 @@
 [![hexlet-check](https://github.com/VorobyevAM/devops-engineer-from-scratch-project-74/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/VorobyevAM/devops-engineer-from-scratch-project-74/actions)
 [![Push](https://github.com/VorobyevAM/devops-engineer-from-scratch-project-74/actions/workflows/push.yml/badge.svg)](https://github.com/VorobyevAM/devops-engineer-from-scratch-project-74/actions/workflows/push.yml)
 
-Автоматизация развертывания и обновления локального окружения с помощью Docker Compose, Github Actions (CI), Makefile
+Учебное Fastify-приложение, упакованное с помощью Docker Compose. Проект
+включает PostgreSQL, reverse proxy Caddy с локальным HTTPS и GitHub Actions,
+который запускает тесты и публикует production-образ в Docker Hub.
 
-Учебный проект Хекслета: https://ru.hexlet.io/programs/devops-engineer-from-scratch
-Как это должно работать: https://asciinema.org/a/zVrFYtslVReMsTyqEEetdWUY5
+[Учебный проект Хекслета](https://ru.hexlet.io/programs/devops-engineer-from-scratch)
 
-## Стек
+## Требования
 
-- Node.js 26
-- Fastify
-- Docker и Docker Compose
+- Git
+- GNU Make
+- Docker Engine или Docker Desktop
+- Docker Compose 1.27.0 или новее (рекомендуется Compose v2 — команда `docker compose`)
+
+Node.js и PostgreSQL устанавливать на хост не нужно: зависимости и сервисы
+запускаются в контейнерах. Для локального запуска должны быть свободны порты
+80 и 443.
 
 ## Установка
-
-<!-- Опишите установку: клонирование, зависимости, переменные окружения -->
 
 ```bash
 git clone https://github.com/VorobyevAM/devops-engineer-from-scratch-project-74.git
@@ -24,31 +28,58 @@ cd devops-engineer-from-scratch-project-74
 make setup
 ```
 
-При первом запуске `make setup` создаёт локальный `.env` из `.env.example`.
+При первом запуске `make setup` создаёт локальный `.env` из `.env.example`,
+собирает образы и устанавливает зависимости приложения внутри Docker.
 Контейнер приложения подключается к PostgreSQL по имени сервиса `db`.
+
+Доступные переменные окружения:
+
+| Переменная | Значение по умолчанию | Назначение |
+|---|---|---|
+| `DATABASE_HOST` | `db` | Имя сервиса PostgreSQL |
+| `DATABASE_PORT` | `5432` | Порт PostgreSQL |
+| `DATABASE_NAME` | `postgres` | Имя базы данных |
+| `DATABASE_USERNAME` | `postgres` | Пользователь базы данных |
+| `DATABASE_PASSWORD` | `password` | Пароль базы данных |
+
+Значения можно переопределить в локальном файле `.env`. Этот файл исключён из
+Git; пример конфигурации находится в `.env.example`.
 
 ## Использование
 
-Запустите приложение:
+Основные команды:
+
+| Команда | Назначение |
+|---|---|
+| `make setup` | Подготовить `.env`, образы и зависимости |
+| `make dev` | Запустить приложение, PostgreSQL и Caddy |
+| `make test` | Собрать production-образ и запустить тесты в Docker Compose |
+| `make build` | Собрать production-образ |
+| `make push` | Отправить production-образ в Docker Hub |
+| `make down` | Остановить и удалить контейнеры проекта |
+
+Запуск приложения:
 
 ```bash
 make dev
 ```
 
 После запуска Caddy перенаправляет <http://localhost> на
-<https://localhost> и проксирует запросы к приложению. Локальный TLS-сертификат
+<https://localhost> и проксирует запросы к Fastify. Локальный TLS-сертификат
 выпущен внутренним центром сертификации Caddy, поэтому браузер может показать
 предупреждение о недоверенном сертификате.
 
-Запустите тесты в изолированной основной конфигурации Compose:
+Запуск тестов в изолированной основной конфигурации Compose:
 
 ```bash
 make test
 ```
 
-Основной файл `docker-compose.yml` запускает тесты, а
-`docker-compose.override.yml`, автоматически подключаемый при локальном запуске,
-переопределяет команду на dev-сервер и публикует порт 8080.
+Основной файл `docker-compose.yml` собирает приложение через
+`Dockerfile.production` и запускает тесты без публикации портов.
+`docker-compose.override.yml` автоматически подключается при локальном запуске,
+использует минимальный `Dockerfile`, монтирует исходники, запускает `make dev` и
+добавляет Caddy с портами 80 и 443.
 
 Соберите production-образ и отправьте его в Docker Hub:
 
@@ -58,20 +89,15 @@ make build
 make push
 ```
 
-Production-образ публикуется как
-`vorobyev93/devops-engineer-from-scratch-project-74:latest`.
+Production-образ:
+[vorobyev93/devops-engineer-from-scratch-project-74](https://hub.docker.com/r/vorobyev93/devops-engineer-from-scratch-project-74)
+(`latest`).
 
 Проверить собранный образ без Compose:
 
 ```bash
 docker run --rm -p 8080:8080 -e NODE_ENV=development \
   vorobyev93/devops-engineer-from-scratch-project-74:latest make dev
-```
-
-Остановить и удалить контейнеры можно командой:
-
-```bash
-make down
 ```
 
 `Makefile` передаёт Docker Compose идентификаторы текущего пользователя. Поэтому
