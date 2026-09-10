@@ -4,14 +4,17 @@ COMPOSE := LOCAL_UID=$(LOCAL_UID) LOCAL_GID=$(LOCAL_GID) docker compose
 
 .PHONY: setup build ci test push dev down
 
-setup:
+.env: .env.example
+	cp .env.example .env
+
+setup: .env
 	$(COMPOSE) build
 	$(COMPOSE) run --rm app make setup
 
 build:
 	$(COMPOSE) -f docker-compose.yml build app
 
-ci:
+ci: .env
 	$(COMPOSE) -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from app
 
 test: ci

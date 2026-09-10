@@ -24,6 +24,9 @@ cd devops-engineer-from-scratch-project-74
 make setup
 ```
 
+При первом запуске `make setup` создаёт локальный `.env` из `.env.example`.
+Контейнер приложения подключается к PostgreSQL по имени сервиса `db`.
+
 ## Использование
 
 Запустите приложение:
