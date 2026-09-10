@@ -45,7 +45,7 @@ The dialect is the same either way, so schema (`db/schema/index.js`) and migrati
 
 ```bash
 make test               # PGlite, in memory
-pnpm run db:generate    # generate a migration from the schema
+npm run db:generate     # generate a migration from the schema
 ```
 
 ## Running an application with Postgres (production)

@@ -1,26 +1,22 @@
 # Сборка отделена от финального образа: vite, tailwind, vitest и drizzle-kit
 # нужны, чтобы собрать ассеты, а приложению в рантайме нет.
-FROM node:26-slim AS builder
-
-# corepack из образов Node 26 убран, поэтому pnpm ставится напрямую. Версия
-# берётся из поля packageManager, чтобы образ и разработка совпадали.
-RUN npm install -g pnpm@11.20.0
+FROM node:26 AS builder
 
 WORKDIR /app
 
 # Зависимости ставятся до копирования кода, чтобы слой с ними переиспользовался
 # и не пересобирался на каждую правку исходников.
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
-RUN pnpm run build
+RUN npm run build
 
 # Дерево обрезается здесь же, а не в финальном образе: тот тогда копирует
 # готовый прод-набор и не ходит в реестр второй раз.
-RUN pnpm prune --prod
+RUN npm prune --omit=dev
 
-FROM node:26-slim
+FROM node:26
 
 WORKDIR /app
 
@@ -30,11 +26,8 @@ COPY package.json ./
 COPY server ./server
 COPY db ./db
 
-# Приложение запускается нодой напрямую, без pnpm и без Makefile: в финальном
-# образе живёт одна команда, а пакетный менеджер тянул бы за собой и себя, и
-# проверку состояния node_modules. Обрезанное дерево эту проверку не проходит
-# (pnpm-lock.yaml здесь нет), и pnpm молча уходил ставить зависимости заново,
-# после чего контейнер падал на «Ignored build scripts».
+# Приложение запускается нодой напрямую, без npm и Makefile: в финальном
+# образе живёт одна команда, а пакетный менеджер в рантайме не нужен.
 #
 # Порт не задаётся: fastify-cli по умолчанию слушает 3000, и на этот порт
 # рассчитан урок docker_basics_course/600-network, где контейнер запускают
