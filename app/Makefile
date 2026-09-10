@@ -13,7 +13,7 @@ start:
 	NODE_ENV=production npm run start
 
 dev:
-	npx concurrently "make start-frontend" "make start-backend"
+	make start-backend
 
 start-backend:
 	npm run start -- --watch --verbose-watch --ignore-watch='node_modules .git dist database'
