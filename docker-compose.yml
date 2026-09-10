@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    image: vorobyev93/devops-engineer-from-scratch-project-74:latest
+    command: make test
+    init: true
