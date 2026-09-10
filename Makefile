@@ -12,7 +12,7 @@ build:
 	$(COMPOSE) -f docker-compose.yml build app
 
 ci:
-	$(COMPOSE) -f docker-compose.yml up --abort-on-container-exit --exit-code-from app
+	$(COMPOSE) -f docker-compose.yml up --build --abort-on-container-exit --exit-code-from app
 
 test: ci
 
