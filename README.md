@@ -91,7 +91,9 @@ make push
 
 Production-образ:
 [vorobyev93/devops-engineer-from-scratch-project-74](https://hub.docker.com/r/vorobyev93/devops-engineer-from-scratch-project-74)
-(`latest`).
+(`latest`). Каждый CI-запуск также публикует неизменяемый тег с полным SHA
+коммита, поэтому при необходимости можно запустить или восстановить конкретную
+версию образа.
 
 Проверить собранный образ без Compose:
 

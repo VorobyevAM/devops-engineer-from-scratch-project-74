@@ -29,4 +29,6 @@ jobs:
           context: .
           file: Dockerfile.production
           push: true
-          tags: vorobyev93/devops-engineer-from-scratch-project-74:latest
+          tags: |
+            vorobyev93/devops-engineer-from-scratch-project-74:latest
+            vorobyev93/devops-engineer-from-scratch-project-74:${{ github.sha }}
